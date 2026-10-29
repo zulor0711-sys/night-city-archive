@@ -1,0 +1,311 @@
+/* =──────────────────────────────────────────────────────────────
+  05 · 义体 / CHROME — ripperdoc fitting room
+  Install hardware, watch the humanity dial bleed out.
+  ────────────────────────────────────────────────────────────── */
+
+.act--chrome {
+  --accent: var(--red);
+  --loss: 0;
+  position: relative;
+  background:
+    radial-gradient(70% 55% at 78% 18%, rgba(255, 27, 27, .07), transparent 68%),
+    var(--bg);
+  overflow: hidden;
+}
+
+/* red bleed that grows as humanity drops */
+.act--chrome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  opacity: calc(var(--loss) * .9);
+  background:
+    radial-gradient(120% 90% at 50% 50%, transparent 42%, rgba(255, 20, 40, .5) 100%),
+    repeating-linear-gradient(to bottom, rgba(255, 0, 40, .05) 0 1px, transparent 1px 3px);
+  mix-blend-mode: screen;
+  transition: opacity .8s var(--e-out);
+}
+
+.chrome {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
+  gap: clamp(20px, 3vw, 54px);
+  align-items: start;
+}
+
+/* -------------------------------------------------------- catalogue -- */
+.chrome__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-2);
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.chrome__caption {
+  font-family: var(--f-cjk);
+  font-size: .84rem;
+  line-height: 1.9;
+  color: var(--ink-dim);
+  padding: 16px 0 6px;
+  max-width: 52ch;
+}
+.chrome__caption b { color: var(--ink); font-weight: 700; }
+
+.chrome__list { margin-top: 8px; }
+
+.chrome__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 10px 13px 0;
+  text-align: left;
+  border-bottom: 1px solid rgba(237, 233, 223, .075);
+  transition: background .3s, padding-left .3s var(--e-out);
+}
+.chrome__row:hover { background: rgba(255, 255, 255, .022); padding-left: 8px; }
+
+.chrome__sym {
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .06em;
+  color: var(--ink-mute);
+  border: 1px solid var(--line-2);
+  padding: 4px 0;
+  text-align: center;
+  transition: all .3s;
+}
+.chrome__row.is-on .chrome__sym {
+  color: #07070a;
+  background: var(--c, var(--red));
+  border-color: var(--c, var(--red));
+}
+
+.chrome__name {
+  font-family: var(--f-cjk);
+  font-size: .94rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--ink-dim);
+  transition: color .3s;
+  display: block;
+}
+.chrome__row:hover .chrome__name,
+.chrome__row.is-on .chrome__name { color: var(--ink); }
+
+.chrome__sub {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  letter-spacing: .12em;
+  color: var(--ink-mute);
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+.chrome__cost {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--ink-mute);
+  transition: color .3s;
+  white-space: nowrap;
+}
+.chrome__cost b { color: var(--red); font-weight: 400; }
+.chrome__row.is-on .chrome__cost { color: var(--c, var(--red)); }
+.chrome__row.is-on .chrome__cost b { color: var(--c, var(--red)); }
+
+/* the flavour line slides out on hover */
+.chrome__note {
+  grid-column: 2 / -1;
+  font-family: var(--f-cjk);
+  font-size: .76rem;
+  line-height: 1.7;
+  color: var(--ink-mute);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .45s var(--e-out), opacity .35s, margin-top .35s;
+}
+.chrome__row:hover .chrome__note,
+.chrome__row.is-on .chrome__note { max-height: 5em; opacity: .8; margin-top: 6px; }
+
+/* ------------------------------------------------------------ stage -- */
+.chrome__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(18px, 2vw, 28px);
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(70% 60% at 50% 28%, rgba(255, 27, 27, .09), transparent 70%),
+    linear-gradient(180deg, rgba(10, 11, 15, .90), rgba(6, 7, 10, .955)),
+    url('../assets/img/nc-cyberware-surgery-red.webp') center / cover no-repeat;
+  overflow: hidden;
+}
+
+.chrome__ring {
+  position: relative;
+  width: min(100%, 400px);
+  aspect-ratio: 1;
+  margin: 4px 0 8px;
+}
+.chrome__ring svg { width: 100%; height: 100%; overflow: visible; }
+
+.ring__track { fill: none; stroke: rgba(237, 233, 223, .075); stroke-width: 10; }
+.ring__ticks line { stroke: rgba(237, 233, 223, .22); stroke-width: 1; }
+.ring__prog {
+  fill: none;
+  stroke: var(--ring-c, #00e5ff);
+  stroke-width: 10;
+  stroke-linecap: butt;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 1.1s var(--e-out), stroke .5s;
+  filter: drop-shadow(0 0 10px var(--ring-c, #00e5ff));
+}
+.ring__glow {
+  fill: none;
+  stroke: var(--ring-c, #00e5ff);
+  stroke-width: 26;
+  opacity: .07;
+  transition: stroke .5s;
+}
+
+.ring__node {
+  fill: #08090c;
+  stroke: rgba(237, 233, 223, .28);
+  stroke-width: 1;
+  transition: fill .4s, stroke .4s, r .3s;
+}
+.ring__node.is-on {
+  fill: var(--c, var(--red));
+  stroke: #fff;
+  stroke-opacity: .7;
+  filter: drop-shadow(0 0 9px var(--c, var(--red)));
+}
+.ring__link {
+  stroke: rgba(237, 233, 223, .12);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  transition: stroke .4s;
+}
+.ring__link.is-on { stroke: var(--c, var(--red)); stroke-dasharray: none; opacity: .6; }
+
+.chrome__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+.chrome__big {
+  font-family: var(--f-display);
+  font-size: clamp(52px, 6vw, 82px);
+  line-height: .9;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  transition: color .5s;
+  font-variant-numeric: tabular-nums;
+}
+.chrome__big i { font-style: normal; font-size: .34em; color: var(--ink-mute); letter-spacing: .1em; }
+.chrome__big.is-low { color: var(--red); }
+.chrome__label {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-top: 8px;
+}
+
+.chrome__meters { width: 100%; margin-top: 14px; }
+.chrome__meter {
+  display: grid;
+  grid-template-columns: 86px 1fr 38px;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.chrome__meter .bar {
+  height: 2px;
+  background: rgba(237, 233, 223, .1);
+  position: relative;
+}
+.chrome__meter .bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--mc, var(--cyan));
+  transition: width .8s var(--e-out);
+}
+.chrome__meter output { text-align: right; color: var(--ink-dim); }
+
+.chrome__status {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--red);
+  font-family: var(--f-cjk);
+  font-size: .78rem;
+  line-height: 1.75;
+  color: var(--ink-dim);
+  background: rgba(255, 27, 27, .035);
+  min-height: 66px;
+}
+.chrome__status b {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 5px;
+  font-weight: 400;
+}
+
+.chrome__reset {
+  margin-top: 12px;
+  align-self: flex-start;
+  padding: 9px 16px;
+  border: 1px solid var(--line-2);
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  transition: all .25s;
+}
+.chrome__reset:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* unstable jitter at low humanity */
+.chrome.is-unstable .chrome__ring { animation: jitter 3.6s steps(1) infinite; }
+@keyframes jitter {
+  0%, 92%, 100% { transform: none; }
+  93% { transform: translate(2px, -1px); }
+  95% { transform: translate(-2px, 1px); }
+  97% { transform: translate(1px, 2px); }
+}
+
+@media (max-width: 1080px) {
+  .chrome { grid-template-columns: 1fr; }
+}

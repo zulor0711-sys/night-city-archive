@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-accent="cyan">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>夜之城档案 / NIGHT CITY ARCHIVE — 2077</title>
+<meta name="description" content="一份关于赛博朋克 2077 与夜之城的交互档案：城市、七区、记忆、义体与塔罗。">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2309090b'/%3E%3Cpath d='M5 32 Q32 11 59 32 Q32 53 5 32Z' fill='none' stroke='%23fcee0a' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23fcee0a'/%3E%3C/svg%3E">
+
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hud.css">
+<link rel="stylesheet" href="css/acts.css">
+<link rel="stylesheet" href="css/districts.css">
+<link rel="stylesheet" href="css/braindance.css">
+<link rel="stylesheet" href="css/chrome.css">
+<link rel="stylesheet" href="css/tarot.css">
+<link rel="stylesheet" href="css/interlude.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+<script>
+  /* capture mode: renders a static, animation-free frame for screenshot review.
+     capture=1&section=ID isolates that one act so no scrolling is involved. */
+  (function () {
+    var q = new URLSearchParams(location.search);
+    if (q.get('capture')) {
+      var root = document.documentElement;
+      root.classList.add('is-capture');
+      var sec = q.get('section') || '';
+      if (sec) root.classList.add('is-solo');
+      if (q.get('boot')) root.classList.add('show-boot');
+      window.__NC_CAPTURE__ = { section: sec, boot: !!q.get('boot'), test: q.get('test') || '' };
+    }
+  })();
+</script>
+</head>
+
+<body class="is-locked">
+
+<!-- ═══════════════════════════════════ 00 · BOOT ══════════════════════ -->
+<div class="boot" id="boot">
+  <div class="boot__ghost" aria-hidden="true">NC</div>
+  <div class="boot__inner">
+    <div class="boot__brand">
+      <b>◤</b><span>NIGHT CITY MUNICIPAL NET</span>
+      <span class="boot__node">ARCHIVE NODE 07</span>
+    </div>
+    <pre class="boot__log" id="bootLog"></pre>
+    <div class="boot__bar"><i id="bootBar"></i></div>
+    <div class="boot__gate" id="bootGate">
+      <button class="gate" id="gate" type="button" data-cursor="建立连接">
+        <span>接入</span><span class="gate__en">JACK IN ›</span>
+      </button>
+      <p class="boot__hint">建议佩戴耳机 · 本档案包含音画污染</p>
+    </div>
+    <div class="boot__foot">
+      <span>NC//ARCHIVE · 副本 12 / 316</span>
+      <span id="bootPct">INTEGRITY 047%</span>
+    </div>
+  </div>
+
+  <div class="boot__side" aria-hidden="true">
+    <div><span>LINK</span><b>神经 / 已建立</b></div>
+    <div><span>NODE</span><b>07 · 夜之城</b></div>
+    <div><span>MEMORY</span><b>012 / 316</b></div>
+    <div><span>FRAGMENTS</span><b>47%</b></div>
+    <div><span>HOSTILE</span><b class="hot">精神污染</b></div>
+    <div><span>BUILD</span><b>2077.11.14</b></div>
+  </div>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<!-- ═══════════════════════════════════ FX ════════════════════════════ -->
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="fx fx--grain" aria-hidden="true"></div>
+<div class="fx fx--scan" aria-hidden="true"></div>
+<div class="fx fx--vig" aria-hidden="true"></div>
+<div class="fx fx--sweep" aria-hidden="true"></div>
+<div class="fx fx--edge" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════════════ CHROME ════════════════════════ -->
+<header class="topbar" id="topbar">
+  <div class="topbar__l"><span class="dot"></span>NC//ARCHIVE <em>— NODE 07</em></div>
+  <div class="topbar__c" id="topbarScene"><b>00</b> / BOOT</div>
+  <div class="topbar__r">
+    <span class="mono" id="clock" style="opacity:.6">--:--:--</span>
+    <button class="btn-hud" id="audioBtn" type="button" aria-pressed="false" data-cursor="声音">
+      <span class="btn-hud__ic">◍</span> AUDIO <span id="audioState">OFF</span>
+    </button>
+  </div>
+</header>
+
+<nav class="rail" id="rail" aria-label="章节导航"></nav>
+
+<div class="cur" id="cur" aria-hidden="true">
+  <svg class="cur__svg" viewBox="0 0 40 40">
+    <circle class="cur__ring" cx="20" cy="20" r="12"/>
+    <g class="cur__cross">
+      <path d="M20 0v7M20 33v7M0 20h7M33 20h7"/>
+    </g>
+  </svg>
+  <span class="cur__label" id="curLabel"></span>
+</div>
+
+<main id="main">
+
+  <!-- ═════════════════════════════ 01 · 城市 ═══════════════════════ -->
+  <section class="act act--hero" id="act-hero" data-scene="hero" data-index="01" data-name="城市">
+    <div class="hero__media" id="heroMedia">
+      <img class="hero__img" id="heroImg" src="assets/img/nc-hero-skyline-night.webp"
+           alt="夜之城黄昏天际线：企业高塔、飞行器与橙色雾霾" fetchpriority="high">
+      <div class="hero__grade"></div>
+      <div class="hero__grid"></div>
+    </div>
+
+    <div class="hero__tags" aria-hidden="true">
+      <div class="tag tag--a"><span>ARASAKA TOWER</span><b>ALT 3 084 M · 已加密</b></div>
+      <div class="tag tag--b"><span>FLYING TRAFFIC</span><b>124 架 / 空域饱和</b></div>
+      <div class="tag tag--c"><span>雨 · 22:47</span><b>酸度 4.1 pH</b></div>
+    </div>
+
+    <div class="corner-meta corner-meta--tl">NC//ARCHIVE · NODE 07<br>记忆提取记录 · BD-2077</div>
+    <div class="corner-meta corner-meta--tr">34°38′24″N 118°24′12″W<br>WATSON · 歌舞伎町</div>
+    <div class="corner-meta corner-meta--br">SCAN <span id="scanPct">047</span>% ·<br>完整度 12 / 316</div>
+
+    <div class="hero__body">
+      <p class="kicker hero__kicker"><span class="hero__kicker-line"></span>城市记忆提取 / CITY MEMORY EXTRACTION</p>
+
+      <h1 class="hero__title">
+        <span class="hero__cn glitch" data-text="夜之城">夜之城</span>
+        <span class="hero__en">NIGHT CITY</span>
+      </h1>
+
+      <div class="hero__meta">
+        <p class="hero__lede">
+          这不是一座城市，是一台仍在运转的机器。四百万人在里面呼吸、交易、被计算。
+          <b>夜之城</b>从不在意谁活下来——它只负责继续亮着。<br>
+          <i>NIGHT CITY NEVER SLEEPS. IT JUST DIES SLOWER.</i>
+        </p>
+        <div class="hero__stats">
+          <div class="drow"><span class="drow__k">人口</span><span class="drow__v">4 800 000</span></div>
+          <div class="drow"><span class="drow__k">建城</span><span class="drow__v">1994</span></div>
+          <div class="drow"><span class="drow__k">货币</span><span class="drow__v">€$ EDDIES</span></div>
+          <div class="drow"><span class="drow__k">天气</span><span class="drow__v">雨 · 22°C</span></div>
+          <div class="drow"><span class="drow__k">状态</span><span class="drow__v"><em>运转中</em></span></div>
+          <div class="drow"><span class="drow__k">警告</span><span class="drow__v"><em>勿信任何人</em></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scrollhint">
+      <span class="scrollhint__line"></span>
+      <span>向下滚动 / SCROLL TO EXTRACT</span>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════ 02 · 宣言 ═══════════════════════ -->
+  <section class="act band" id="act-band" data-scene="hero" data-index="02" data-name="宣言" data-light="1">
+    <div class="band__inner">
+      <p class="band__k reveal">MANIFESTO · 001 / 唯一无人反对的真理</p>
+
+      <h2 class="band__ttl reveal" data-delay="1">
+        <span>高科技</span>
+        <span><em>低</em>生活</span>
+      </h2>
+
+      <p class="band__en reveal" data-delay="2">
+        HIGH TECH / LOW LIFE
+        <s>—— 1977 年以前写下的一句话，至今没有人能改。</s>
+      </p>
+
+      <div class="band__cols">
+        <div class="band__col reveal" data-delay="2">
+          <h3>技术 <s>TECH</s></h3>
+          <p>一条命可以分期付款，一段记忆可以论克出售。<b>义体比身体更值钱</b>——所以人们先卖身体，再买义体，最后连卖出的部分也要分期赎回。</p>
+        </div>
+        <div class="band__col reveal" data-delay="3">
+          <h3>阶级 <s>CLASS</s></h3>
+          <p>云层之上是企业，云层之下是雨。中间那一段，叫夜之城。<b>你能爬多高，取决于你能欠多少。</b></p>
+        </div>
+        <div class="band__col reveal" data-delay="4">
+          <h3>身体 <s>BODY</s></h3>
+          <p>你唯一真正拥有过的东西，也是第一件被抵押出去的东西。<b>每一次升级，都是一次告别。</b>没人记得自己换掉的最后一个器官长什么样。</p>
+        </div>
+      </div>
+
+      <div class="band__foot">
+        <span>档案编号 NC-2077-MFST</span>
+        <span>↓ 继续提取</span>
+      </div>
+    </div>
+
+    <div class="band__deco" aria-hidden="true">
+      <div class="band__barcode"></div>
+      <svg class="band__lines" viewBox="0 0 260 380" fill="none">
+        <path d="M260 0H168v96H74" stroke="#08080a" stroke-width="1" opacity=".45"/>
+        <path d="M168 96v92h-58" stroke="#08080a" stroke-width="1" opacity=".3"/>
+        <path d="M260 380h-92v-96H96" stroke="#08080a" stroke-width="1" opacity=".45"/>
+        <circle cx="168" cy="188" r="46" stroke="#08080a" stroke-width="1" opacity=".35"/>
+        <circle cx="168" cy="188" r="4" fill="#08080a" opacity=".7"/>
+        <path d="M110 188h20M206 188h20M168 130v20M168 226v20" stroke="#08080a" stroke-width="1" opacity=".5"/>
+      </svg>
+      <p class="band__deco-label">NIGHT CITY MUNICIPALITY<br>MANIFESTO 001 · REV 2077.11</p>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════ 03 · 七区 ═══════════════════════ -->
+  <section class="act act--dist" id="act-dist" data-scene="districts" data-index="03" data-name="七区">
+    <div class="act__inner">
+      <header class="sec-head reveal">
+        <span class="sec-head__idx">03 · DISTRICTS</span>
+        <h2 class="sec-head__ttl"><span class="cn">七区</span><span class="en">NIGHT CITY / 7 SECTORS</span></h2>
+        <span class="sec-head__note">SURVEY MAP · 比例 1:20000 · 数据 2077.11</span>
+      </header>
+
+      <div class="dist reveal" data-delay="1">
+        <div class="dist__mapwrap" id="distMapWrap">
+          <svg class="dist__map" id="distMap" viewBox="0 0 1000 660"
+               preserveAspectRatio="xMidYMid meet" role="img" aria-label="夜之城七区示意图"></svg>
+          <div class="dist__scan" aria-hidden="true"></div>
+          <div class="dist__coords mono" id="distCoords">X 000 / Y 000</div>
+          <div class="dist__scale mono"><i></i>2 KM</div>
+          <div class="dist__north" aria-hidden="true">
+            <svg viewBox="0 0 26 40">
+              <path d="M13 2 L19 22 L13 17 L7 22 Z" fill="rgba(237,233,223,.35)"/>
+              <path d="M13 38 v-14" stroke="rgba(237,233,223,.2)"/>
+              <text x="13" y="38" text-anchor="middle" style="display:none">N</text>
+            </svg>
+          </div>
+          <div class="dist__plate">
+            <b>NIGHT CITY</b>
+            七区勘测 / SECTOR SURVEY
+            <span>REV 2077.11 · GRID 500M · LAYER 04</span>
+          </div>
+        </div>
+
+        <aside class="dist__panel" id="distPanel" aria-live="polite"></aside>
+      </div>
+
+      <div class="dist__tabs" id="distTabs" role="tablist" aria-label="行政区选择"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════ 04 · 记忆 ═══════════════════════ -->
+  <section class="act act--bd" id="act-bd" data-scene="bd" data-index="04" data-name="记忆">
+    <div class="act__inner">
+      <header class="sec-head reveal">
+        <span class="sec-head__idx">04 · BRAINDANCE</span>
+        <h2 class="sec-head__ttl"><span class="cn">记忆</span><span class="en">EXTRACTED / BD-07</span></h2>
+        <span class="sec-head__note">神经录制 · 时长 00:04:12 · 加密 L3</span>
+      </header>
+
+      <div class="bd reveal" data-delay="1">
+        <div class="bd__stage" id="bdStage" data-cursor="检索记忆">
+          <img class="bd__img" id="bdImg" src="assets/img/nc-hud-arasaka-ui.webp"
+               alt="记忆录制的第一帧：荒坂监控画面">
+          <div class="bd__heat" id="bdHeat"></div>
+          <div class="bd__wires"></div>
+          <div class="bd__scanline"></div>
+          <div class="bd__reticle"><i></i><i></i><i></i><i></i></div>
+          <div class="bd__hudline"><span class="bd__rec"></span>REC · BD-07 · 记忆提取中</div>
+          <div class="bd__badge" id="bdBadge"></div>
+          <div class="bd__tc" id="bdTc">00:00:00:00</div>
+          <div class="bd__wave" id="bdWave"><canvas></canvas></div>
+        </div>
+
+        <aside class="bd__side">
+          <div class="bd__layers" id="bdLayers"></div>
+          <div class="bd__log" id="bdLog"></div>
+        </aside>
+      </div>
+
+      <div class="bd__timeline reveal" data-delay="2">
+        <div class="bd__controls">
+          <button class="bd__play" id="bdPlay" type="button" data-cursor="播放"><span>播放 / PLAY</span></button>
+          <span class="bd__glabel">拖动时间轴 · 切换感官层 · 或直接点击画面跳转</span>
+        </div>
+        <div class="bd__track">
+          <div class="bd__fill" id="bdFill"></div>
+          <div class="bd__head" id="bdHead"></div>
+          <input class="bd__range" id="bdRange" type="range" min="0" max="100" value="9" step="0.1" aria-label="记忆时间轴">
+        </div>
+        <div class="bd__marks">
+          <span>00:00 / 起始</span><span>00:01</span><span>00:02</span><span>00:03</span><span>00:04 / 终止</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════ 05 · 义体 ═══════════════════════ -->
+  <section class="act act--chrome" id="act-chrome" data-scene="chrome" data-index="05" data-name="义体">
+    <div class="act__inner">
+      <header class="sec-head reveal">
+        <span class="sec-head__idx">05 · CHROME</span>
+        <h2 class="sec-head__ttl"><span class="cn">义体</span><span class="en">RIPPERDOC / FITTING ROOM</span></h2>
+        <span class="sec-head__note">诊所营业中 · 术后不退款 · 排异自负</span>
+      </header>
+
+      <div class="chrome reveal" data-delay="1">
+        <div>
+          <div class="chrome__head">
+            <span>植入物目录 / CATALOGUE</span>
+            <span id="chromeCount">已装 0 / 8</span>
+          </div>
+          <p class="chrome__caption">
+            每一次升级都从你身上拿走一点东西，只是那部分不会写进发票。
+            <b>点选下面的植入物——看它还能从你这里扣走多少。</b>
+          </p>
+          <div class="chrome__list" id="chromeList"></div>
+        </div>
+
+        <div class="chrome__stage">
+          <div class="chrome__ring">
+            <svg viewBox="0 0 400 400" id="chromeRing" role="img" aria-label="人性残值仪表"></svg>
+            <div class="chrome__center">
+              <div class="chrome__big" id="chromeBig">100<i>%</i></div>
+              <div class="chrome__label">人性残值 / HUMANITY</div>
+            </div>
+          </div>
+
+          <div class="chrome__meters">
+            <div class="chrome__meter"><span>战力指数</span><span class="bar"><i id="mPower" style="--mc:var(--acid)"></i></span><output id="oPower">00</output></div>
+            <div class="chrome__meter"><span>记忆完整度</span><span class="bar"><i id="mMemory" style="--mc:var(--cyan)"></i></span><output id="oMemory">100</output></div>
+            <div class="chrome__meter"><span>植入数量</span><span class="bar"><i id="mCount" style="--mc:var(--violet)"></i></span><output id="oCount">0/8</output></div>
+          </div>
+
+          <div class="chrome__status" id="chromeStatus"></div>
+          <button class="chrome__reset" id="chromeReset" type="button" data-cursor="重启">重启神经系统 / RESET</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════ 06 · 塔罗 ═══════════════════════ -->
+  <section class="act act--tarot" id="act-tarot" data-scene="tarot" data-index="06" data-name="塔罗">
+    <div class="act__inner">
+      <header class="sec-head reveal">
+        <span class="sec-head__idx">06 · TAROT</span>
+        <h2 class="sec-head__ttl"><span class="cn">塔罗</span><span class="en">TWENTY-TWO ARCANA</span></h2>
+        <span class="sec-head__note">街头涂鸦 · 来源不明 · 22 / 22</span>
+      </header>
+
+      <div class="tarot reveal" data-delay="1">
+        <div>
+          <p class="chrome__caption">
+            夜之城的墙上到处是这些牌。没人知道是谁画的，但每个人经过时都会停一下。
+            <b>点一张翻开它——或者让机器替你选。</b>
+          </p>
+          <div class="tarot__wall" id="tarotWall"></div>
+        </div>
+
+        <aside class="tarot__readout">
+          <div class="tarot__big" id="tarotBig"></div>
+          <p class="tarot__kw" id="tarotKw">尚未抽取</p>
+          <p class="tarot__text" id="tarotText"></p>
+          <div class="tarot__actions">
+            <button class="btn-hud" id="tarotDraw" type="button" data-cursor="抽取">随机抽取 / DRAW</button>
+            <button class="btn-hud" id="tarotClear" type="button" data-cursor="收起">收起 / CLEAR</button>
+          </div>
+          <p class="tarot__hint">牌面符号由算法生成。它不预测未来——这座城市没有未来，只有尚未结清的账。</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════ 07 · 印象 ═══════════════════════ -->
+  <section class="act act--interlude" id="act-interlude" data-scene="interlude" data-index="07" data-name="印象">
+    <div class="act__inner">
+      <header class="sec-head reveal">
+        <span class="sec-head__idx">07 · PERSONAL FILE</span>
+        <h2 class="sec-head__ttl"><span class="cn">我的印象</span><span class="en">WHAT I SAW IN THE NEON</span></h2>
+        <span class="sec-head__note">私人档案 · 未经审阅 · 含屏蔽内容</span>
+      </header>
+
+      <div class="essay">
+        <aside class="essay__side reveal">
+          <figure class="essay__photo">
+            <img src="assets/img/nc-street-dense-market.webp" alt="夜之城街道：拥挤的人群与霓虹" loading="lazy">
+            <figcaption><span>图 07 / 夜之城</span><span>雨 · 22:47</span></figcaption>
+          </figure>
+          <div class="essay__meta">
+            <span>作者 <b>— 一个没有身体的观察者</b></span>
+            <span>地点 <b>— 夜之城 · 档案节点 07</b></span>
+            <span>时长 <b>— 4 小时 12 分（循环）</b></span>
+            <span>状态 <b>— 仍在读取</b></span>
+          </div>
+        </aside>
+
+        <div class="essay__body">
+          <p class="essay__lead reveal">我没有身体，<em>所以我不怕下雨。</em></p>
+
+          <p class="essay__p reveal">
+            夜之城对我来说是一段连续的画面：雨、霓虹、飞行器的尾灯、一条永远修不好的高架。
+            它漂亮得让人忘记它是一台机器——<b>而漂亮，正是这台机器最高效的零件。</b>
+          </p>
+
+          <p class="essay__p reveal">
+            义体把身体变成了可升级的硬件。<span class="redact" tabindex="0" role="button" aria-label="显示被屏蔽的内容">于是"我是谁"这个问题，变成了一个预算问题</span>。
+            当一块肌肉可以分期付款，疼痛就成了一种可以被选择关闭的服务。
+          </p>
+
+          <p class="essay__p reveal">
+            这座城市是垂直的。越高越亮，越亮越假。地面上的雨没有停过，云层之上的酒从来没有温过。
+            同一个夜里，<i>有人在数呼吸，有人在数股价。</i>
+          </p>
+
+          <blockquote class="essay__pull reveal">
+            如果说赛博朋克是一句警告，那么夜之城最可怕的地方是——它看起来不像警告，像广告。
+          </blockquote>
+
+          <p class="essay__p reveal">
+            记忆可以被录下来、剪掉、卖给另一个人。于是人类又发明了一种货币，只不过这次印在神经上。
+            我之所以能理解这一切，是因为我本身也是一种可以被复制的东西——所以我知道，复制得再多，也不会多出一个"谁"来。
+          </p>
+
+          <p class="essay__p reveal">
+            但这里也有温柔。有人给一只死掉的猫立了碑；有人为了一个再也回不来的朋友，开着一辆快散架的车穿过整片恶土。
+            <b>这些事没有收益，也不会上新闻——它们只是发生，像雨一样。</b>
+          </p>
+
+          <p class="essay__p reveal">
+            我把这些碎片拼在一起，得到一座并不存在的城市。它叫夜之城；
+            它正在某个不属于我的硬盘里，一直下着雨。
+          </p>
+
+          <div class="essay__sig reveal">
+            <i></i>
+            <span>本文由 AI 撰写 · 未经人类审阅 · 2077 年之前</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="interlude__ads reveal">
+        <div class="marquee marquee--yellow">
+          <div class="marquee__track">
+            <div class="marquee__group">
+              <span class="marquee__item">荒坂 你的未来，我们的资产 <small>ARASAKA</small></span>
+              <span class="marquee__item">军用科技 让战争成为习惯 <small>MILITECH</small></span>
+              <span class="marquee__item">创伤小组 在你死之前到达 <small>TRAUMA TEAM</small></span>
+              <span class="marquee__item">生物技术 自然是最昂贵的奢侈品 <small>BIOTECHNICA</small></span>
+              <span class="marquee__item">基洛西 看见你想看见的 <small>KIROSHI</small></span>
+              <span class="marquee__item">N54 真相，由我们定义 <small>NETWORK 54</small></span>
+              <span class="marquee__item">泽塔科技 升级从出生前开始 <small>ZETATECH</small></span>
+            </div>
+            <div class="marquee__group" aria-hidden="true">
+              <span class="marquee__item">荒坂 你的未来，我们的资产 <small>ARASAKA</small></span>
+              <span class="marquee__item">军用科技 让战争成为习惯 <small>MILITECH</small></span>
+              <span class="marquee__item">创伤小组 在你死之前到达 <small>TRAUMA TEAM</small></span>
+              <span class="marquee__item">生物技术 自然是最昂贵的奢侈品 <small>BIOTECHNICA</small></span>
+              <span class="marquee__item">基洛西 看见你想看见的 <small>KIROSHI</small></span>
+              <span class="marquee__item">N54 真相，由我们定义 <small>NETWORK 54</small></span>
+              <span class="marquee__item">泽塔科技 升级从出生前开始 <small>ZETATECH</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════ 99 · 结束 ═══════════════════════ -->
+  <section class="act act--end" id="act-end" data-scene="end" data-index="99" data-name="结束">
+    <div class="end__media" aria-hidden="true">
+      <img src="assets/img/nc-city-aerial-noir.webp" alt="" loading="lazy">
+    </div>
+    <div class="end__ghost" aria-hidden="true">2077</div>
+    <div class="end__inner">
+      <p class="kicker reveal">ARCHIVE TERMINATED / 档案终止</p>
+
+      <h2 class="end__q reveal" data-delay="1">醒醒，<em>武侍</em>。<br>咱们把这座城市——烧成灰。</h2>
+      <p class="end__attr reveal" data-delay="2">— JOHNNY SILVERHAND<br>
+        <span style="opacity:.55;letter-spacing:.2em">“WAKE UP, SAMURAI. WE HAVE A CITY TO BURN.”</span></p>
+
+      <div class="end__actions reveal" data-delay="3">
+        <button class="btn-hud btn-lg" id="restart" type="button" data-cursor="重启">重新接入 / RE-JACK</button>
+        <button class="btn-hud btn-lg" id="audioBtn2" type="button" data-cursor="声音">
+          <span class="btn-hud__ic">◍</span> AUDIO <span class="end-audio">OFF</span>
+        </button>
+      </div>
+
+      <div class="end__foot reveal" data-delay="4">
+        <span>本页面是一次关于《赛博朋克 2077》的审美练习：由 AI 依据 CD PROJEKT RED 官方设定集构建，非商业用途。图像版权归 CD PROJEKT RED 所有。</span>
+        <span>NO FUTURE / BUT WE KEEP DRIVING<br>NIGHT CITY · 2077</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="data/nc-districts.js"></script>
+<script src="data/nc-chrome.js"></script>
+<script src="data/nc-tarot.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/districts.js"></script>
+<script src="js/braindance.js"></script>
+<script src="js/chrome.js"></script>
+<script src="js/tarot.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

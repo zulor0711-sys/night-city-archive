@@ -1,0 +1,449 @@
+/* =──────────────────────────────────────────────────────────────
+  03 · 七区 / DISTRICTS — night city survey map
+  ────────────────────────────────────────────────────────────── */
+
+.act--dist {
+  --accent: var(--cyan);
+  background:
+    radial-gradient(70% 55% at 30% 12%, rgba(0, 229, 255, .045), transparent 70%),
+    var(--bg);
+}
+
+.dist {
+  display: grid;
+  grid-template-columns: minmax(0, 1.62fr) minmax(310px, .88fr);
+  gap: clamp(14px, 1.8vw, 26px);
+  align-items: stretch;
+}
+
+/* ---------------------------------------------------------- the map --- */
+.dist__mapwrap {
+  position: relative;
+  background:
+    radial-gradient(120% 100% at 50% 45%, #0a0d13 0%, #07080c 62%, #05060a 100%);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  aspect-ratio: 1000 / 640;
+  --bc: var(--accent);
+}
+
+/* corner registration marks (kept off .bracket so the gradient isn't reset) */
+.dist__mapwrap::before,
+.dist__panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: .75;
+  background-image:
+    linear-gradient(var(--bc), var(--bc)), linear-gradient(var(--bc), var(--bc)),
+    linear-gradient(var(--bc), var(--bc)), linear-gradient(var(--bc), var(--bc)),
+    linear-gradient(var(--bc), var(--bc)), linear-gradient(var(--bc), var(--bc)),
+    linear-gradient(var(--bc), var(--bc)), linear-gradient(var(--bc), var(--bc));
+  background-repeat: no-repeat;
+  background-size:
+    14px 1px, 1px 14px, 14px 1px, 1px 14px,
+    14px 1px, 1px 14px, 14px 1px, 1px 14px;
+  background-position:
+    left top, left top, right top, right top,
+    left bottom, left bottom, right bottom, right bottom;
+}
+
+.dist__map { width: 100%; height: 100%; display: block; }
+
+/* svg layers */
+.nc-water  { fill: url(#ncWater); }
+.nc-land   { fill: #0b0e14; stroke: rgba(237, 233, 223, .1); stroke-width: 1; }
+.nc-grid   { stroke: rgba(237, 233, 223, .05); stroke-width: 1; fill: none; }
+.nc-road   { fill: none; stroke: rgba(0, 229, 255, .22); stroke-width: 1; stroke-dasharray: 2 6; }
+.nc-road2  { fill: none; stroke: rgba(237, 233, 223, .12); stroke-width: 1; }
+.nc-hwy    { fill: none; stroke: rgba(252, 238, 10, .22); stroke-width: 1.4; }
+.nc-hatch  { fill: url(#ncHatch); opacity: .5; }
+
+.nc-dist {
+  cursor: pointer;
+  fill: var(--d, #00e5ff);
+  fill-opacity: .09;
+  stroke: var(--d, #00e5ff);
+  stroke-opacity: .45;
+  stroke-width: 1;
+  transition: fill-opacity .35s var(--e-out), stroke-opacity .35s, stroke-width .2s, opacity .4s;
+  outline: none;
+}
+.nc-dist:hover,
+.nc-dist:focus-visible {
+  fill-opacity: .20;
+  stroke-opacity: .95;
+  stroke-width: 1.6;
+}
+.nc-dist:not(.is-on) { opacity: .55; }
+.nc-dist.is-on {
+  fill-opacity: .22;
+  stroke-opacity: 1;
+  stroke-width: 2.2;
+  opacity: 1;
+  /* 无 color-mix 的浏览器用这条，现代浏览器用下一条 */
+  filter: drop-shadow(0 0 14px var(--d, #00e5ff));
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--d, #00e5ff) 65%, transparent));
+}
+.nc-dist.is-on:hover { fill-opacity: .28; }
+
+/* survey frame ticks */
+.nc-ticks line { stroke: rgba(237, 233, 223, .18); stroke-width: 1; }
+
+/* title plate inside the map frame */
+.dist__plate {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 4;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  line-height: 1.8;
+  pointer-events: none;
+  max-width: 46%;
+}
+.dist__plate b { display: block; color: var(--ink-dim); font-weight: 400; letter-spacing: .3em; }
+.dist__plate span { opacity: .62; }
+
+/* no imagery available for a sector yet */
+.dist__media.is-empty {
+  background:
+    repeating-linear-gradient(135deg, rgba(237, 233, 223, .035) 0 5px, transparent 5px 11px),
+    rgba(255, 255, 255, .012);
+  display: grid;
+  place-items: center;
+}
+.dist__nofeed {
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: rgba(237, 233, 223, .22);
+  z-index: 2;
+}
+
+.nc-label { pointer-events: none; }
+.nc-label__cn {
+  font-family: var(--f-cjk);
+  font-weight: 700;
+  font-size: 17px;
+  fill: rgba(237, 233, 223, .92);
+  letter-spacing: .04em;
+  transition: fill .3s;
+}
+.nc-label__en {
+  font-family: var(--f-hud);
+  font-weight: 600;
+  font-size: 7.4px;
+  letter-spacing: .26em;
+  fill: rgba(237, 233, 223, .42);
+  text-transform: uppercase;
+}
+.nc-label__idx {
+  font-family: var(--f-mono);
+  font-size: 6.6px;
+  letter-spacing: .1em;
+  fill: rgba(237, 233, 223, .28);
+}
+.nc-dist:hover + .nc-label .nc-label__cn,
+.nc-dist.is-on + .nc-label .nc-label__cn { fill: var(--d); }
+
+.nc-cross line { stroke: rgba(252, 238, 10, .5); stroke-width: 1; }
+.nc-cross circle { fill: none; stroke: rgba(252, 238, 10, .7); stroke-width: 1; }
+
+/* map ornaments */
+.dist__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0, 229, 255, .06) 48%,
+    rgba(0, 229, 255, .14) 50%,
+    rgba(0, 229, 255, .06) 52%,
+    transparent 100%);
+  height: 26%;
+  animation: mapscan 7.5s var(--e-io) infinite;
+  mix-blend-mode: screen;
+}
+@keyframes mapscan {
+  0%   { transform: translateY(-120%); }
+  60%  { transform: translateY(400%); }
+  100% { transform: translateY(400%); }
+}
+
+.dist__coords,
+.dist__scale {
+  position: absolute;
+  bottom: 10px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  color: var(--ink-mute);
+  pointer-events: none;
+  text-transform: uppercase;
+}
+.dist__coords { left: 12px; }
+.dist__scale { right: 12px; display: flex; align-items: center; gap: 7px; }
+.dist__scale i {
+  display: block;
+  width: 46px;
+  height: 5px;
+  border: 1px solid var(--line-2);
+  border-top: 0;
+}
+.dist__north {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 26px;
+  height: 40px;
+  pointer-events: none;
+  opacity: .5;
+}
+.dist__north svg { width: 100%; height: 100%; }
+.dist__north text {
+  font-family: var(--f-mono);
+  font-size: 8px;
+  fill: var(--ink-mute);
+  letter-spacing: .1em;
+}
+
+/* --------------------------------------------------------- the panel -- */
+.dist__panel {
+  position: relative;
+  padding: clamp(18px, 1.8vw, 26px);
+  background: linear-gradient(180deg, rgba(10, 12, 17, .94), rgba(6, 7, 10, .96));
+  border: 1px solid var(--line);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  --bc: var(--d, var(--cyan));
+}
+
+.dist__panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(90% 60% at 100% 0%, rgba(0, 229, 255, .16), transparent 65%);
+  background: radial-gradient(90% 60% at 100% 0%, color-mix(in srgb, var(--d, #00e5ff) 16%, transparent), transparent 65%);
+  opacity: .5;
+}
+
+.dist__idx {
+  position: absolute;
+  top: 6px;
+  right: 14px;
+  font-family: var(--f-display);
+  font-size: 104px;
+  line-height: 1;
+  color: var(--d, #fff);
+  opacity: .10;
+  pointer-events: none;
+  letter-spacing: -.02em;
+}
+
+.dist__head { position: relative; z-index: 2; }
+.dist__kicker {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--d, var(--cyan));
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dist__kicker::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--d, var(--cyan));
+}
+
+.dist__name {
+  font-family: var(--f-cjk);
+  font-weight: 700;
+  font-size: clamp(30px, 3.1vw, 44px);
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+.dist__en {
+  font-family: var(--f-cond);
+  font-weight: 600;
+  font-size: .8rem;
+  letter-spacing: .42em;
+  color: var(--ink-mute);
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.dist__mood {
+  position: relative;
+  z-index: 2;
+  margin: clamp(14px, 1.6vw, 22px) 0 12px;
+  font-family: var(--f-cjk);
+  font-size: .845rem;
+  line-height: 1.9;
+  color: var(--ink-dim);
+  letter-spacing: .012em;
+}
+.dist__mood b { color: var(--d, var(--cyan)); font-weight: 700; }
+
+/* the NCPD's own assessment, quoted straight from the city */
+.dist__threat {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 clamp(10px, 1.2vw, 15px);
+  padding: 6px 0 6px 12px;
+  border-left: 1px solid var(--d, var(--cyan));
+  font-family: var(--f-cjk);
+  font-size: .735rem;
+  line-height: 1.72;
+  color: var(--ink-mute);
+}
+.dist__threat s {
+  display: block;
+  text-decoration: none;
+  margin-top: 5px;
+  font-family: var(--f-mono);
+  font-size: 7.5px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  opacity: .6;
+}
+
+.dist__facts { position: relative; z-index: 2; }
+.dist__fact {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(237, 233, 223, .07);
+  font-size: .78rem;
+}
+.dist__fact span {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .18em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.dist__fact b { font-weight: 500; color: var(--ink); font-family: var(--f-cjk); letter-spacing: .02em; }
+
+.dist__bars { display: flex; gap: 18px; margin-top: 4px; }
+.dist__bar { flex: 1; }
+.dist__bar > i {
+  display: flex;
+  justify-content: space-between;
+  font-style: normal;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .14em;
+  color: var(--ink-mute);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+.dist__bar .meter { height: 2px; background: rgba(237, 233, 223, .1); }
+.dist__bar .meter__fill { background: var(--d, var(--cyan)); }
+
+.dist__media {
+  position: relative;
+  margin-top: auto;
+  height: clamp(78px, 10vw, 128px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  flex: none;
+}
+.dist__media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: grayscale(.5) contrast(1.12) brightness(.7)
+          drop-shadow(0 0 0 transparent);
+  transition: transform .8s var(--e-out), filter .6s;
+}
+.dist__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6, 7, 10, .95), transparent 70%);
+  pointer-events: none;
+}
+.dist__media figcaption {
+  position: absolute;
+  left: 8px; bottom: 6px;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .16em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  z-index: 2;
+}
+.dist__media:hover img { transform: scale(1.05); filter: grayscale(0) contrast(1.08) brightness(.82); }
+
+/* ---------------------------------------------------------- tabs ----- */
+.dist__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.dist__tab {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 12px clamp(10px, 1.3vw, 20px) 11px 0;
+  margin-right: clamp(4px, 1.2vw, 22px);
+  font-family: var(--f-cjk);
+  font-size: .82rem;
+  color: var(--ink-mute);
+  transition: color .25s;
+  white-space: nowrap;
+}
+.dist__tab s {
+  text-decoration: none;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .1em;
+  opacity: .6;
+}
+.dist__tab::after {
+  content: '';
+  position: absolute;
+  left: 0; right: clamp(4px, 1.2vw, 22px); bottom: -1px;
+  height: 1px;
+  background: var(--d, var(--cyan));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .35s var(--e-out);
+}
+.dist__tab:hover { color: var(--ink); }
+.dist__tab.is-on { color: var(--d, var(--cyan)); }
+.dist__tab.is-on::after { transform: scaleX(1); }
+
+/* swap flash when the selection changes */
+.dist__panel.is-swap .dist__head,
+.dist__panel.is-swap .dist__mood,
+.dist__panel.is-swap .dist__facts {
+  animation: swap-in .45s var(--e-out) both;
+}
+@keyframes swap-in {
+  0%   { opacity: 0; transform: translateY(6px); filter: blur(2px); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+
+@media (max-width: 1080px) {
+  .dist { grid-template-columns: 1fr; }
+  .dist__media { height: 140px; }
+}

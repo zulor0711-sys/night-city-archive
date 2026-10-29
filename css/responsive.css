@@ -1,0 +1,145 @@
+/* =──────────────────────────────────────────────────────────────
+  responsive — 窄屏修正
+  这些问题只在手机上才暴露，集中放这里，不动原来的桌面版式。
+  ────────────────────────────────────────────────────────────── */
+
+/* ---------- 顶栏：窄屏不放时钟，按钮收紧，别再溢出 ---------- */
+@media (max-width: 820px) {
+  .topbar {
+    grid-template-columns: auto 1fr auto;
+    padding: 0 14px;
+    gap: 8px;
+    font-size: 9px;
+    letter-spacing: .14em;
+  }
+  .topbar__l { gap: 7px; }
+  .topbar__l em { display: none; }
+  .topbar__r {
+    gap: 8px !important;
+    grid-column: 3;
+  }
+  .topbar__r .mono { display: none; }      /* 时钟 */
+  .btn-hud { padding: 6px 9px; letter-spacing: .14em; font-size: 9px; }
+  .btn-hud__ic { font-size: 9px; }
+}
+
+@media (max-width: 420px) {
+  .topbar__l { font-size: 8px; letter-spacing: .1em; }
+  .topbar__l .dot { display: none; }
+}
+
+/* ---------- 章节标题：窄屏纵向堆叠，避免挤成一字一行 ---------- */
+@media (max-width: 900px) {
+  .sec-head {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'idx ttl'
+      'note note';
+    gap: 10px 12px;
+    align-items: baseline;
+    padding-bottom: 12px;
+    margin-bottom: clamp(22px, 5vw, 36px);
+  }
+  .sec-head__idx { grid-area: idx; padding-top: 0; }
+  .sec-head__ttl {
+    grid-area: ttl;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+    min-width: 0;
+  }
+  .sec-head__ttl .cn { font-size: clamp(26px, 8.2vw, 38px); white-space: nowrap; }
+  .sec-head__ttl .en { font-size: 9.5px; letter-spacing: .18em; transform: none; white-space: normal; }
+  .sec-head__note {
+    grid-area: note;
+    white-space: normal;
+    text-align: left;
+    align-self: start;
+    padding-bottom: 0;
+    font-size: 8.5px;
+    line-height: 1.7;
+  }
+}
+
+/* ---------- 首屏：装饰标签收掉，别压到标题上 ---------- */
+@media (max-width: 900px) {
+  .tag--b, .tag--c { display: none; }
+  .tag--a { top: 20%; left: 6%; }
+}
+@media (max-width: 560px) {
+  .hero__tags { display: none; }
+  .corner-meta { font-size: 8px; letter-spacing: .14em; }
+}
+
+/* ---------- 七区地图：扇区名放大到看得清 ---------- */
+@media (max-width: 900px) {
+  .nc-label__cn { font-size: 25px; }
+  .nc-label__en, .nc-label__idx { display: none; }
+  .dist__plate, .dist__scale { display: none; }
+  .dist__coords { font-size: 8px; }
+}
+@media (max-width: 560px) {
+  .nc-label__cn { font-size: 34px; }
+}
+
+/* ---------- 超梦：时间码与徽标别打架 ---------- */
+@media (max-width: 900px) {
+  .bd__tc { font-size: 12px; right: 14px; bottom: 12px; }
+  .bd__badge { left: 14px; bottom: 40px; }
+  .bd__badge span { font-size: 7px; padding: 3px 5px; }
+  .bd__layer { padding: 11px 12px; }
+  .bd__play { padding: 7px 12px; font-size: 8.5px; }
+}
+
+/* ---------- 义体：环表控制在屏幕内 ---------- */
+@media (max-width: 900px) {
+  .chrome__ring { width: min(100%, 320px); }
+  .chrome__meter { grid-template-columns: 70px 1fr 32px; gap: 10px; }
+  .chrome__row { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; }
+  .chrome__note { font-size: .72rem; }
+}
+
+/* ---------- 塔罗：牌墙在窄屏 5 列，牌不至于太小 ---------- */
+@media (max-width: 900px) {
+  .tarot__wall { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+}
+@media (max-width: 420px) {
+  .tarot__wall { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ---------- 随笔：手机上的照片压矮一点，正文别太窄 ---------- */
+@media (max-width: 640px) {
+  .essay__photo img { aspect-ratio: 4 / 3; }
+  .essay__lead { font-size: clamp(22px, 6.4vw, 30px); }
+  .essay__pull { font-size: clamp(16px, 4.6vw, 20px); padding-left: 16px; }
+}
+
+/* ---------- 开场终端：手机上收紧 ---------- */
+@media (max-width: 640px) {
+  .boot__inner { font-size: 11px; }
+  .boot__log { line-height: 1.9; min-height: 10em; }
+  .boot__side { display: none; }
+  .boot__foot { font-size: 8px; letter-spacing: .14em; }
+  .gate { padding: 13px 22px; font-size: .95rem; }
+}
+
+/* ---------- 黄色宣言：手机上字号与缩进 ---------- */
+@media (max-width: 560px) {
+  .band__ttl { font-size: clamp(56px, 17vw, 96px); }
+  .band__ttl span { padding-left: clamp(20px, 9vw, 60px); }
+  .band__ttl span:first-child { padding-left: 0; }
+  .band__cols { gap: 22px; }
+}
+
+/* ---------- 结尾：窄屏别让 2077 抢字 ---------- */
+@media (max-width: 640px) {
+  .end__ghost { font-size: clamp(90px, 26vw, 160px); bottom: -30px; }
+  .end__q { font-size: clamp(24px, 7.4vw, 34px); }
+  .end__foot { font-size: 9px; }
+}
+
+/* ---------- 全局：窄屏左右留白收一点 ---------- */
+@media (max-width: 560px) {
+  :root { --pad-x: 18px; }
+  .act { padding-top: clamp(38px, 9vw, 64px); padding-bottom: clamp(38px, 9vw, 64px); }
+}

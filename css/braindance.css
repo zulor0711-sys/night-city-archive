@@ -1,0 +1,393 @@
+/* =──────────────────────────────────────────────────────────────
+  04 · 记忆 / BRAINDANCE — memory extraction editor
+  A playable three-layer braindance: visual / audio / thermal,
+  scrubbed along a timeline with a transcript.
+  ────────────────────────────────────────────────────────────── */
+
+.act--bd {
+  --accent: var(--violet);
+  background:
+    radial-gradient(80% 60% at 70% 0%, rgba(138, 77, 255, .10), transparent 65%),
+    radial-gradient(60% 50% at 10% 90%, rgba(0, 229, 255, .05), transparent 70%),
+    var(--bg);
+}
+
+.bd {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, .8fr);
+  gap: clamp(14px, 1.6vw, 22px);
+  align-items: stretch;
+}
+
+/* ------------------------------------------------------------ stage --- */
+.bd__stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: #05060a;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  isolation: isolate;
+  cursor: crosshair;
+  touch-action: none;   /* 手机上点画面检索记忆时不要滚动页面 */
+}
+
+.bd__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 52% 46%;
+  filter: saturate(.7) contrast(1.1) brightness(.8);
+  transform: scale(1.02);
+  transition: filter .5s var(--e-out), opacity .4s, transform 1.2s var(--e-out);
+  will-change: filter;
+}
+
+/* visual layer off = signal loss */
+.bd__stage.is-novisual .bd__img {
+  filter: grayscale(1) contrast(.5) brightness(.32);
+  opacity: .5;
+  transform: scale(1.05) translateX(2px);
+}
+
+/* audio layer on = chroma smear */
+.bd__stage.is-audio .bd__img {
+  filter: saturate(1.05) contrast(1.18) brightness(.86);
+  transform: scale(1.045);
+}
+
+/* thermal layer */
+.bd__stage.is-thermal .bd__img {
+  filter: grayscale(1) contrast(1.5) brightness(1.05);
+}
+
+.bd__heat {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity .6s var(--e-out);
+  background:
+    radial-gradient(38% 42% at 34% 30%, rgba(255, 106, 0, .72), rgba(255, 20, 60, .28) 46%, transparent 72%),
+    radial-gradient(30% 34% at 68% 58%, rgba(255, 0, 128, .55), rgba(120, 0, 255, .22) 50%, transparent 74%),
+    radial-gradient(26% 30% at 18% 68%, rgba(0, 190, 255, .42), transparent 70%),
+    linear-gradient(160deg, rgba(0, 60, 255, .55), rgba(0, 10, 60, .9) 55%, rgba(255, 80, 0, .35));
+}
+.bd__stage.is-thermal .bd__heat { opacity: .92; }
+
+/* the internal wiring grid of the viewer */
+.bd__wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(0, 229, 255, .09) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 229, 255, .07) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%);
+  opacity: .55;
+}
+
+.bd__scanline {
+  position: absolute;
+  left: 0; right: 0;
+  height: 44px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, .16), transparent);
+  mix-blend-mode: screen;
+  animation: bd-scan 5.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes bd-scan {
+  0%   { transform: translateY(-60px); }
+  100% { transform: translateY(calc(100% + 60px)); }
+}
+
+/* reticle corners */
+.bd__reticle { position: absolute; inset: 14px; pointer-events: none; }
+.bd__reticle i {
+  position: absolute;
+  width: 18px; height: 18px;
+  border: 1px solid rgba(237, 233, 223, .45);
+}
+.bd__reticle i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.bd__reticle i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.bd__reticle i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.bd__reticle i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+.bd__hudline {
+  position: absolute;
+  top: 22px; left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(237, 233, 223, .72);
+  pointer-events: none;
+}
+.bd__rec {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--mag);
+  box-shadow: 0 0 10px var(--mag);
+  animation: blink 1.4s steps(2) infinite;
+}
+
+.bd__tc {
+  position: absolute;
+  right: 24px; bottom: 20px;
+  font-family: var(--f-mono);
+  font-size: clamp(13px, 1.4vw, 18px);
+  letter-spacing: .1em;
+  color: var(--ink);
+  text-shadow: 0 0 18px rgba(0, 229, 255, .5);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.bd__tc em { font-style: normal; color: var(--cyan); }
+
+.bd__badge {
+  position: absolute;
+  left: 24px; bottom: 20px;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+}
+.bd__badge span {
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  padding: 4px 7px;
+  border: 1px solid rgba(237, 233, 223, .2);
+  color: var(--ink-mute);
+  transition: all .3s;
+}
+.bd__badge span.on { border-color: var(--cyan); color: var(--cyan); }
+
+/* waveform strip */
+.bd__wave {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 54px;
+  pointer-events: none;
+  opacity: .0;
+  transition: opacity .5s;
+  mix-blend-mode: screen;
+}
+.bd__stage.is-audio .bd__wave { opacity: 1; }
+.bd__wave canvas { width: 100%; height: 100%; display: block; }
+
+/* clicking the stage seeks */
+.bd__stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* ------------------------------------------------------------- side --- */
+.bd__side {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.3vw, 18px);
+  min-width: 0;
+}
+
+.bd__layers { display: flex; flex-direction: column; gap: 1px; background: var(--line); }
+
+.bd__layer {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  background: rgba(10, 12, 17, .92);
+  text-align: left;
+  transition: background .25s;
+}
+.bd__layer:hover { background: rgba(18, 21, 30, .95); }
+
+.bd__layer i {
+  width: 12px; height: 12px;
+  border: 1px solid var(--ink-mute);
+  transition: all .25s;
+}
+.bd__layer.is-on i {
+  background: var(--l, var(--cyan));
+  border-color: var(--l, var(--cyan));
+  box-shadow: 0 0 12px var(--l, var(--cyan));
+}
+.bd__layer b {
+  font-family: var(--f-cjk);
+  font-weight: 700;
+  font-size: .84rem;
+  letter-spacing: .04em;
+  color: var(--ink-dim);
+  transition: color .25s;
+}
+.bd__layer.is-on b { color: var(--ink); }
+.bd__layer s {
+  text-decoration: none;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .18em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.bd__layer.is-on s { color: var(--l, var(--cyan)); }
+
+/* transcript */
+.bd__log {
+  position: relative;
+  flex: 1;
+  min-height: 170px;
+  padding: 16px;
+  background: rgba(6, 7, 11, .72);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  font-family: var(--f-cjk);
+  font-size: .8rem;
+  line-height: 1.85;
+  color: var(--ink-mute);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 82%, transparent 100%);
+}
+.bd__log::before {
+  content: 'TRANSCRIPT / 记忆转录';
+  position: absolute;
+  top: 8px; right: 12px;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .2em;
+  color: rgba(237, 233, 223, .22);
+}
+.bd__line {
+  display: block;
+  opacity: .32;
+  transform: translateY(2px);
+  transition: opacity .35s, transform .35s, color .35s;
+  margin-bottom: 1.05em;
+  position: relative;
+  padding-left: 46px;
+}
+.bd__line em {
+  position: absolute;
+  left: 0;
+  font-style: normal;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .06em;
+  color: var(--cyan);
+  opacity: .5;
+  top: 4px;
+}
+.bd__line.is-on { opacity: 1; transform: none; color: var(--ink); }
+.bd__line.is-past { opacity: .5; }
+
+/* timeline */
+.bd__timeline { margin-top: clamp(14px, 1.8vw, 22px); }
+
+.bd__track {
+  position: relative;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background:
+    repeating-linear-gradient(to right, rgba(237, 233, 223, .07) 0 1px, transparent 1px 2.5%);
+  cursor: ew-resize;
+  touch-action: none;   /* 手机上拖时间轴不要滚动页面 */
+}
+
+.bd__fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0;
+  background: linear-gradient(to right, rgba(138, 77, 255, .18), rgba(0, 229, 255, .16));
+  border-right: 1px solid var(--cyan);
+  pointer-events: none;
+}
+
+.bd__head {
+  position: absolute;
+  top: -5px; bottom: -5px;
+  width: 1px;
+  background: var(--yellow);
+  box-shadow: 0 0 14px rgba(252, 238, 10, .8);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+.bd__head::after {
+  content: '';
+  position: absolute;
+  top: -6px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid var(--yellow);
+}
+
+.bd__marks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  letter-spacing: .16em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+.bd__range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  z-index: 3;
+}
+
+.bd__controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.bd__play {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px 8px 14px;
+  border: 1px solid var(--line-2);
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  transition: all .25s;
+}
+.bd__play:hover { border-color: var(--violet); color: var(--ink); }
+.bd__play.is-on { border-color: var(--violet); color: var(--violet); }
+.bd__glabel {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-left: auto;
+}
+
+@media (max-width: 1080px) {
+  .bd { grid-template-columns: 1fr; }
+  .bd__stage { aspect-ratio: 16 / 11; }
+}

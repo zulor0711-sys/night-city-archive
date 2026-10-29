@@ -1,0 +1,83 @@
+/* =──────────────────────────────────────────────────────────────
+  NIGHT CITY ARCHIVE — design tokens
+  Palette derived from the official artbook: acid yellow brand,
+  near-black paper, cyan HUD, magenta error, warm bone ink.
+  ────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+
+  /* ---- surface ---- */
+  --bg:          #07070a;
+  --bg-2:        #0b0c10;
+  --bg-3:        #111318;
+  --panel:       rgba(9, 11, 15, .82);
+  --panel-solid: #0a0b0f;
+
+  /* ---- ink ---- */
+  --ink:      #ede9df;                     /* warm bone, like artbook paper */
+  --ink-dim:  rgba(237, 233, 223, .62);
+  --ink-mute: rgba(237, 233, 223, .34);
+
+  /* ---- accents ---- */
+  --yellow: #fcee0a;                       /* Arasaka brand yellow */
+  --cyan:   #00e5ff;
+  --mag:    #ff2e63;
+  --red:    #ff1b1b;
+  --acid:   #c8ff2e;
+  --violet: #8a4dff;
+  --amber:  #ff9d2f;
+
+  /* ---- lines ---- */
+  --line:     rgba(237, 233, 223, .12);
+  --line-2:   rgba(237, 233, 223, .22);
+  --line-cy:  rgba(0, 229, 255, .30);
+  --line-y:   rgba(252, 238, 10, .34);
+
+  /* ---- type ---- */
+  --f-display: 'Anton', 'Saira Condensed', 'Archivo Black', Impact, 'Arial Black', sans-serif;
+  --f-cond:    'Barlow Condensed', 'Saira Condensed', 'Oswald', sans-serif;
+  --f-hud:     'Chakra Petch', 'Rajdhani', 'Bahnschrift', 'Segoe UI', sans-serif;
+  --f-mono:    'JetBrains Mono', 'Share Tech Mono', Consolas, 'Courier New', monospace;
+  --f-cjk:     'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC',
+               'Source Han Sans SC', sans-serif;
+
+  --fs-clamp-display: clamp(3.6rem, 13.5vw, 15rem);
+  --fs-h2:  clamp(2rem, 4.6vw, 3.9rem);
+  --fs-h3:  clamp(1.25rem, 2vw, 1.75rem);
+  --fs-body: clamp(.94rem, 1.05vw, 1.06rem);
+  --fs-small: .8125rem;
+  --fs-micro: .6875rem;
+
+  --track-label: .3em;
+  --track-display: -.01em;
+
+  /* ---- metrics ---- */
+  --pad-x: clamp(18px, 4.4vw, 74px);
+  --pad-y: clamp(48px, 9vw, 132px);
+  --topbar-h: 54px;
+  --rail-w: 58px;
+  --maxw: 1740px;
+
+  /* ---- motion ---- */
+  --e-out: cubic-bezier(.16, 1, .3, 1);
+  --e-io:  cubic-bezier(.76, 0, .24, 1);
+  --t-fast: 180ms;
+  --t-mid:  420ms;
+  --t-slow: 900ms;
+
+  --z-canvas: 1;
+  --z-fx: 3;
+  --z-content: 5;
+  --z-chrome: 40;
+  --z-cursor: 90;
+  --z-boot: 100;
+}
+
+/* per-act accent, switched on <main> or section via data-accent */
+[data-accent='yellow'] { --accent: var(--yellow); }
+[data-accent='cyan']   { --accent: var(--cyan); }
+[data-accent='mag']    { --accent: var(--mag); }
+[data-accent='violet'] { --accent: var(--violet); }
+[data-accent='acid']   { --accent: var(--acid); }
+[data-accent='bone']   { --accent: var(--ink); }
+:root { --accent: var(--cyan); }
